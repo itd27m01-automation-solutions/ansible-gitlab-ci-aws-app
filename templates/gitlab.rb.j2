@@ -1,0 +1,23 @@
+external_url 'https://{{ gitlab_access_url }}'
+letsencrypt['enable'] = false
+postgresql['enable'] = false
+gitlab_rails['db_adapter'] = "postgresql"
+gitlab_rails['db_encoding'] = "unicode"
+gitlab_rails['db_host'] = "{{ gitlab_db_instance_address }}"
+gitlab_rails['db_database'] = "{{ gitlab_db }}"
+gitlab_rails['db_username'] = "{{ gitlab_db_instance_username }}"
+gitlab_rails['db_password'] = "{{ gitlab_db_instance_password }}"
+gitlab_rails['db_port'] = 5432
+redis['enable'] = false
+gitlab_rails['redis_host'] = "{{ gitlab_regis_endpoint }}"
+gitlab_rails['redis_port'] = 6379
+nginx['listen_port'] = 80
+nginx['listen_https'] = false
+gitlab_rails['gitaly_token'] = '{{ gitlab_token }}'
+gitlab_shell['secret_token'] = '{{ gitlab_token }}'
+
+gitaly['enable'] = false
+
+git_data_dirs({
+  'default' => { 'gitaly_address' => 'tcp://{{ hostvars[groups['gitaly'][gitaly_active_index]]['ansible_eth0']['ipv4']['address'] }}:8075' },
+})

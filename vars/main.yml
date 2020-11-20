@@ -1,0 +1,4 @@
+---
+gitlab_config: "/etc/gitlab/gitlab.rb"
+gitlab_ctl: "/usr/bin/gitlab-ctl"
+gitlab_db: "gitlab"

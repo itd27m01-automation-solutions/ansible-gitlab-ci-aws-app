@@ -1,0 +1,47 @@
+---
+- name: Install dependencies
+  apt:
+    name: python3-psycopg2
+    state: present
+
+- name: Install PostgreSQL extentions
+  block:
+  - name: Check PostgreSQL extentions
+    community.general.postgresql_query:
+      login_host: "{{ gitlab_db_instance_address }}"
+      login_user: "{{ gitlab_db_instance_username }}"
+      login_password: "{{ gitlab_db_instance_password }}"
+      db: "{{ gitlab_db }}"
+      query: "SELECT extname FROM pg_extension WHERE extname='{{ item }}';"
+    with_items:
+      - pg_trgm
+      - btree_gist
+    register: pg_extension
+
+  - name: Install PostgreSQL extentions if not present
+    community.general.postgresql_query:
+      login_host: "{{ gitlab_db_instance_address }}"
+      login_user: "{{ gitlab_db_instance_username }}"
+      login_password: "{{ gitlab_db_instance_password }}"
+      db: "{{ gitlab_db }}"
+      query: "CREATE EXTENSION {{ item }};"
+    with_items: "{{ pg_extension.results | sum(attribute='query_result', start=[]) | map(attribute='extname') | difference(['pg_trgm', 'btree_gist']) }}"
+  run_once: true
+
+- name: Configure App settings
+  ansible.builtin.template:
+    dest: "{{ gitlab_config }}"
+    src: gitlab.rb.j2
+    owner: root
+    group: root
+    mode: '0600'
+  register: gitlab_app
+  notify:
+    - gitlab_restart
+
+- name: gitlab_reconfigure
+  command:
+    cmd: "{{ gitlab_ctl }} reconfigure"
+  async: 300
+  poll: 20
+  when: gitlab_app.changed
