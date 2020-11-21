@@ -1,2 +1,4 @@
 ---
 gitaly_active_index: 1
+aws_region: 'us-east-1'
+gitlab_installation_prefix: 'gitlab-ci-aws'

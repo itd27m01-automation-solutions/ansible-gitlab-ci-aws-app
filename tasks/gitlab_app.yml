@@ -1,0 +1,18 @@
+---
+- name: Configure App settings
+  ansible.builtin.template:
+    dest: "{{ gitlab_config }}"
+    src: gitlab.rb.j2
+    owner: root
+    group: root
+    mode: '0600'
+  register: gitlab_app
+  notify:
+    - gitlab_restart
+
+- name: gitlab_reconfigure
+  command:
+    cmd: "{{ gitlab_ctl }} reconfigure"
+  async: 300
+  poll: 20
+  when: gitlab_app.changed

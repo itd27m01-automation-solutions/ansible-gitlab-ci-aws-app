@@ -1,0 +1,11 @@
+---
+# Configures ssh daemon to work with GitLab Shell
+- name: Ensure sshd configuration
+  ansible.builtin.template:
+    dest: "{{ gitlab_app_sshd_config }}"
+    src: sshd_config.j2
+    owner: root
+    group: root
+    mode: '0600'
+  notify:
+    - sshd_reload

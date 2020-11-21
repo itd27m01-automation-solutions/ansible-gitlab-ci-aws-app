@@ -1,0 +1,29 @@
+---
+- name: Install dependencies
+  apt:
+    name: python3-psycopg2
+    state: present
+
+- name: Ensure PostgreSQL extentions
+  block:
+    - name: Check PostgreSQL extentions
+      community.general.postgresql_query:
+        login_host: "{{ gitlab_db_instance_address }}"
+        login_user: "{{ gitlab_db_instance_username }}"
+        login_password: "{{ gitlab_db_instance_password }}"
+        db: "{{ gitlab_db }}"
+        query: "SELECT extname FROM pg_extension WHERE extname='{{ item }}';"
+      with_items:
+        - pg_trgm
+        - btree_gist
+      register: pg_extension
+
+    - name: Install PostgreSQL extentions if not present
+      community.general.postgresql_query:
+        login_host: "{{ gitlab_db_instance_address }}"
+        login_user: "{{ gitlab_db_instance_username }}"
+        login_password: "{{ gitlab_db_instance_password }}"
+        db: "{{ gitlab_db }}"
+        query: "CREATE EXTENSION {{ item }};"
+      with_items: "{{ pg_extension.results | sum(attribute='query_result', start=[]) | map(attribute='extname') | difference(['pg_trgm', 'btree_gist']) }}"
+  run_once: true

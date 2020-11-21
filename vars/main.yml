@@ -1,4 +1,8 @@
 ---
 gitlab_config: "/etc/gitlab/gitlab.rb"
 gitlab_ctl: "/usr/bin/gitlab-ctl"
-gitlab_db: "gitlab"
+
+gitlab_app_sshd_config: "/etc/ssh/sshd_config"
+
+# Distro depended
+gitlab_app_sshd_service: "ssh"

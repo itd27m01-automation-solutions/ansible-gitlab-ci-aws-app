@@ -4,3 +4,8 @@
     cmd: "{{ gitlab_ctl }} restart"
   async: 300
   poll: 20
+
+- name: sshd_reload
+  systemd:
+    name: "{{ gitlab_app_sshd_service }}"
+    state: reloaded

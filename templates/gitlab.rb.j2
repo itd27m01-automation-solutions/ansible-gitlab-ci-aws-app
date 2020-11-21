@@ -1,3 +1,4 @@
+#
 external_url 'https://{{ gitlab_access_url }}'
 letsencrypt['enable'] = false
 postgresql['enable'] = false
@@ -21,3 +22,28 @@ gitaly['enable'] = false
 git_data_dirs({
   'default' => { 'gitaly_address' => 'tcp://{{ hostvars[groups['gitaly'][gitaly_active_index]]['ansible_eth0']['ipv4']['address'] }}:8075' },
 })
+
+# Consolidated object storage configuration
+gitlab_rails['object_store']['enabled'] = true
+gitlab_rails['object_store']['proxy_download'] = true
+gitlab_rails['object_store']['connection'] = {
+    'provider' => 'AWS',
+    'region' => '{{ aws_region }}',
+    'use_iam_profile' => true
+}
+
+gitlab_rails['object_store']['objects']['artifacts']['bucket'] = '{{ gitlab_installation_prefix }}-gitlab-artifacts'
+gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = '{{ gitlab_installation_prefix }}-gitlab-external-diffs'
+gitlab_rails['object_store']['objects']['lfs']['bucket'] = '{{ gitlab_installation_prefix }}-gitlab-lfs-objects'
+gitlab_rails['object_store']['objects']['uploads']['bucket'] = '{{ gitlab_installation_prefix }}-gitlab-uploads'
+gitlab_rails['object_store']['objects']['packages']['bucket'] = '{{ gitlab_installation_prefix }}-gitlab-packages'
+gitlab_rails['object_store']['objects']['dependency_proxy']['bucket'] = '{{ gitlab_installation_prefix }}-gitlab-dependency-proxy'
+gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = '{{ gitlab_installation_prefix }}-gitlab-erraform-state'
+
+# Backup related object storage configuration
+gitlab_rails['backup_upload_connection'] = {
+  'provider' => 'AWS',
+  'region' => '{{ aws_region }}',
+  'use_iam_profile' => true
+}
+gitlab_rails['backup_upload_remote_directory'] = '{{ gitlab_installation_prefix }}-gitlab-backup'
